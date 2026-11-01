@@ -3,6 +3,7 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Local development fallback only. Set DJANGO_SECRET_KEY in real deployments.
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY") or "dev-only-insecure-key"
 DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
