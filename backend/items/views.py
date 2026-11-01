@@ -11,7 +11,8 @@ from .serializers import RegisterSerializer, WorkflowItemSerializer
 
 class WorkflowItemViewSet(viewsets.ModelViewSet):
     serializer_class = WorkflowItemSerializer
-
+    
+    # Return only the logged-in user's items, so users cannot see each other's data.
     def get_queryset(self):
         return WorkflowItem.objects.filter(owner=self.request.user).order_by("-created_at")
 
