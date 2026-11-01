@@ -19,8 +19,6 @@ export default function Column({
   const [title, setTitle] = useState("");
   const [priority, setPriority] = useState("Medium");
 
-  const overLimit = column.wip != null && items.length > column.wip;
-
   const reset = () => {
     setTitle("");
     setPriority("Medium");
@@ -59,14 +57,6 @@ export default function Column({
             {items.length}
           </span>
         </div>
-        {column.wip != null && (
-          <span
-            className={`wip${overLimit ? " wip--over" : ""}`}
-            title={overLimit ? "Over the work-in-progress limit" : "Work-in-progress limit"}
-          >
-            WIP: {column.wip}
-          </span>
-        )}
       </header>
 
       <div className="column__cards">
