@@ -1,10 +1,9 @@
-// Board columns in order. `wip` is a work-in-progress limit that is shown on the column
-// (the badge turns red when the column holds more cards than the limit).
+// Board columns in order. The last column is the "done" column, which is shown in green.
 export const COLUMNS = [
   { status: "Backlog" },
   { status: "Sprint Ready" },
-  { status: "In Progress", wip: 3 },
-  { status: "Code Review", wip: 2 },
+  { status: "In Progress" },
+  { status: "Code Review" },
   { status: "QA" },
   { status: "Done", done: true },
 ];
