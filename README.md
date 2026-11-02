@@ -1,9 +1,11 @@
 # WorkFlowHub
 
+![CI](https://github.com/aissiddhartha/workflowhub/actions/workflows/ci.yml/badge.svg)
+
 A minimal workflow and productivity platform built for the SOFT806 CI/CD assignment.
 Users can register, log in, and create, edit, delete and move workflow items across a sprint board
 (Backlog, Sprint Ready, In Progress, Code Review, QA, Done) by dragging cards between columns.
-Each item has a title, an optional description, optional story points and an optional label.
+Each item has a title, an optional description and a priority (Low, Medium, High or Urgent).
 
 ## Tech stack
 - Backend: Django + Django REST Framework (token authentication), SQLite
@@ -60,7 +62,7 @@ Frontend: http://localhost:5173
 ## API endpoints
 | Method | Path | Description |
 |---|---|---|
-| POST | /api/auth/register/ | Register, returns a token |
+| POST | /api/auth/register/ | Register with username, unique email and a strong password; returns a token |
 | POST | /api/auth/login/ | Log in, returns a token |
 | POST | /api/auth/logout/ | Log out (needs token) |
 | GET, POST | /api/workflow-items/ | List and create items |
@@ -69,7 +71,7 @@ Frontend: http://localhost:5173
 Authenticated requests send the header `Authorization: Token <token>`.
 
 A workflow item has these fields: `title`, `description`, `status` (one of `Backlog`, `Sprint Ready`,
-`In Progress`, `Code Review`, `QA`, `Done`), `points` (optional whole number) and `label` (optional text).
+`In Progress`, `Code Review`, `QA`, `Done`), and `priority` (one of `Low`, `Medium`, `High`, `Urgent`; default `Medium`).
 Users only ever see their own items.
 
 ## Branching and CI
