@@ -1,0 +1,30 @@
+version: 2.1
+
+jobs:
+  build-backend:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build backend image
+          command: docker build -t workflowhub-backend ./backend
+
+  build-frontend:
+    docker:
+      - image: cimg/base:stable
+    environment:
+      VITE_API_URL: http://localhost:8000
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build frontend image
+          command: docker build --build-arg VITE_API_URL=$VITE_API_URL -t workflowhub-frontend ./frontend
+
+workflows:
+  build:
+    jobs:
+      - build-backend
+      - build-frontend
