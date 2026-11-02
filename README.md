@@ -1,4 +1,5 @@
 # WorkFlowHub
+
 ![CI](https://github.com/aissiddhartha/workflowhub/actions/workflows/ci.yml/badge.svg)
 
 A minimal workflow and productivity platform built for the SOFT806 CI/CD assignment.
