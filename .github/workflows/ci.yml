@@ -18,6 +18,8 @@ jobs:
         run: docker build -t workflowhub-backend ./backend
       - name: Check Django configuration inside the container
         run: docker run --rm -e DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} workflowhub-backend python manage.py check
+              - name: Run unit tests inside the container
+        run: docker run --rm -e DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} workflowhub-backend python manage.py test
         
   build-frontend:
     runs-on: ubuntu-latest
