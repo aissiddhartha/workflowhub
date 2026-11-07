@@ -42,3 +42,8 @@ class ItemOwnershipTests(APITestCase):
         self.client.force_authenticate(user=self.other)
         response = self.client.get(f"/api/workflow-items/{self.item.id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class DemoFailureTests(APITestCase):
+    def test_demo_failure(self):
+        self.assertEqual(1, 2)
