@@ -12,14 +12,33 @@ env:
 jobs:
   build-backend:
     runs-on: ubuntu-latest
+    env:
+      POSTGRES_DB: workflowhub
+      POSTGRES_USER: workflowhub
+      POSTGRES_PASSWORD: ci-test-password
+      POSTGRES_HOST: localhost
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: workflowhub
+          POSTGRES_USER: workflowhub
+          POSTGRES_PASSWORD: ci-test-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U workflowhub -d workflowhub"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v4
       - name: Build backend image
         run: docker build -t workflowhub-backend ./backend
       - name: Check Django configuration inside the container
-        run: docker run --rm -e DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} workflowhub-backend python manage.py check
+        run: docker run --rm --network host -e DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} -e POSTGRES_DB -e POSTGRES_USER -e POSTGRES_PASSWORD -e POSTGRES_HOST workflowhub-backend python manage.py check
       - name: Run unit tests inside the container
-        run: docker run --rm -e DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} workflowhub-backend python manage.py test
+        run: docker run --rm --network host -e DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} -e POSTGRES_DB -e POSTGRES_USER -e POSTGRES_PASSWORD -e POSTGRES_HOST workflowhub-backend python manage.py test
 
   build-frontend:
     runs-on: ubuntu-latest
