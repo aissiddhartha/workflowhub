@@ -122,3 +122,24 @@ class ItemApiTests(APITestCase):
         response = self.client.delete(f"/api/workflow-items/{item.id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertTrue(WorkflowItem.objects.filter(id=item.id).exists())
+
+class StatusLabelTests(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user("sid", "sid@example.com", "Strong@123")
+        self.client.force_authenticate(user=self.user)
+ 
+    def test_every_board_status_is_accepted(self):
+        labels = ["Backlog", "To Do", "Pending", "In Progress", "Code Review", "QA", "Completed"]
+        for label in labels:
+            response = self.client.post(
+                "/api/workflow-items/", {"title": f"Task {label}", "status": label}
+            )
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED, label)
+            self.assertEqual(response.data["status"], label)
+ 
+    def test_retired_status_names_are_rejected(self):
+        for label in ["Sprint Ready", "Done"]:
+            response = self.client.post(
+                "/api/workflow-items/", {"title": "Old label", "status": label}
+            )
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, label)

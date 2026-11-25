@@ -115,7 +115,7 @@ textarea {
 /* ---------- Board ---------- */
 .board {
   display: grid;
-  grid-template-columns: repeat(6, minmax(210px, 1fr));
+  grid-template-columns: repeat(7, minmax(180px, 1fr));
   overflow-x: auto;
   border: 1px solid #eceef2;
   border-radius: 10px;
