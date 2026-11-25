@@ -94,7 +94,7 @@ export default function App() {
       setItems((prev) => prev.map((item) => (item.id === id ? saved : item)));
       setError("");
       if (before && saved.status !== before.status) {
-        setToast({ text: `"${saved.title}" is moved to ${saved.status}.` });
+        setToast({ text: `"${saved.title}" moved from ${before.status} to ${saved.status}.` });
       }
     } catch {
       setItems(previous);

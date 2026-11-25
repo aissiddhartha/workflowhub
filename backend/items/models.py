@@ -5,11 +5,12 @@ from django.db import models
 class WorkflowItem(models.Model):
     class Status(models.TextChoices):
         BACKLOG = "Backlog", "Backlog"
-        SPRINT_READY = "Sprint Ready", "Sprint Ready"
+        TODO = "To Do", "To Do"
+        PENDING = "Pending", "Pending"
         IN_PROGRESS = "In Progress", "In Progress"
         CODE_REVIEW = "Code Review", "Code Review"
         QA = "QA", "QA"
-        DONE = "Done", "Done"
+        COMPLETED = "Completed", "Completed"
 
     class Priority(models.TextChoices):
         LOW = "Low", "Low"

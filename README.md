@@ -4,7 +4,7 @@
 
 A minimal workflow and productivity platform built for the SOFT806 CI/CD assignment.
 Users can register, log in, and create, edit, delete and move workflow items across a sprint board
-(Backlog, Sprint Ready, In Progress, Code Review, QA, Done) by dragging cards between columns.
+(Backlog, To Do, Pending, In Progress, Code Review, QA, Done) by dragging cards between columns.
 Each item has a title, an optional description and a priority (Low, Medium, High or Urgent).
 
 ## Tech stack
@@ -98,9 +98,20 @@ After changing `backend/items/models.py`, run `python manage.py makemigrations` 
 
 Authenticated requests send the header `Authorization: Token <token>`.
 
-A workflow item has these fields: `title`, `description`, `status` (one of `Backlog`, `Sprint Ready`,
-`In Progress`, `Code Review`, `QA`, `Done`), and `priority` (one of `Low`, `Medium`, `High`, `Urgent`; default `Medium`).
+A workflow item has these fields: `title`, `description`, `status` (one of `Backlog`, `To Do`, `Pending`,
+`In Progress`, `Code Review`, `QA`, `Completed`), and `priority` (one of `Low`, `Medium`, `High`, `Urgent`; default `Medium`).
 Users only ever see their own items.
+
+## Status meanings
+| Status | Meaning |
+|---|---|
+| Backlog | Idea captured, not planned |
+| To Do | Planned for the current sprint, not started |
+| Pending | Started but waiting on something (blocked or waiting for input) |
+| In Progress | Someone is actively working on it |
+| Code Review | Pull request open, waiting for a reviewer |
+| QA | Merged, being tested |
+| Completed | Tested and finished |
 
 ## Branching and CI
 Work is done on `feature/*` branches and merged to `main` through reviewed pull requests.
