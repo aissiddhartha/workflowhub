@@ -107,7 +107,7 @@ Users only ever see their own items.
 |---|---|
 | Backlog | Idea captured, not planned |
 | To Do | Planned for the current sprint, not started |
-| Pending | Started but waiting on something (blocked or waiting for input) |
+| Pending | Ready to be picked up but waiting on something (a dependency or a decision) before work can start |
 | In Progress | Someone is actively working on it |
 | Code Review | Pull request open, waiting for a reviewer |
 | QA | Merged, being tested |
