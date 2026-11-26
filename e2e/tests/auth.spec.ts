@@ -82,4 +82,14 @@ test.describe('Authentication Tests', () => {
     ).toBeVisible();
   });
 
+  test('TC11 - Prevent unauthenticated access to sprint board', async ({ page }) => {
+    await expect(
+        page.getByRole('heading', { name: 'Welcome back' })
+    ).toBeVisible();
+
+    await expect(
+        page.getByRole('heading', { name: 'WorkFlowHub Sprint Board' })
+    ).not.toBeVisible();
+});
+
 });

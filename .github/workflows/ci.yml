@@ -149,13 +149,14 @@ jobs:
           path: e2e/playwright-report/
           retention-days: 30
 
-      - name: Upload Playwright test results
+      - name: Upload Playwright HTML report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-test-results
-          path: e2e/test-results/
+          name: playwright-report
+          path: e2e/playwright-report/
           retention-days: 30
+          if-no-files-found: error
 
       - name: Display Docker logs on failure
         if: failure()

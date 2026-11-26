@@ -26,6 +26,8 @@ jobs:
       - run:
           name: Build frontend image
           command: |
+            : "${VITE_API_URL:?VITE_API_URL is required}"
+
             docker build \
               --build-arg VITE_API_URL="$VITE_API_URL" \
               -t workflowhub-frontend ./frontend

@@ -1,7 +1,7 @@
 // Read the API base address from the environment configuration.
-const apiUrl = import.meta.env.VITE_API_URL;
+const apiUrl = import.meta.env.VITE_API_URL?.trim();
 
-if (apiUrl === undefined) {
+if (!apiUrl) {
   throw new Error("VITE_API_URL is not configured.");
 }
 
