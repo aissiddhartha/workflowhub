@@ -7,16 +7,22 @@ on:
     branches: [main]
 
 env:
-  VITE_API_URL: http://localhost:8000
+  VITE_API_URL: ${{ vars.CI_VITE_API_URL }}
 
 jobs:
   build-backend:
+    name: Build and Test Backend
     runs-on: ubuntu-latest
+
     env:
       POSTGRES_DB: workflowhub
       POSTGRES_USER: workflowhub
       POSTGRES_PASSWORD: ci-test-password
       POSTGRES_HOST: localhost
+      DJANGO_SECRET_KEY: ci-only-test-secret-key-not-for-production
+      DJANGO_ALLOWED_HOSTS: ${{ vars.CI_DJANGO_ALLOWED_HOSTS }}
+      CORS_ALLOWED_ORIGINS: ${{ vars.CI_CORS_ALLOWED_ORIGINS }}
+
     services:
       postgres:
         image: postgres:16-alpine
@@ -31,18 +37,130 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Build backend image
         run: docker build -t workflowhub-backend ./backend
-      - name: Check Django configuration inside the container
-        run: docker run --rm --network host -e DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} -e POSTGRES_DB -e POSTGRES_USER -e POSTGRES_PASSWORD -e POSTGRES_HOST workflowhub-backend python manage.py check
-      - name: Run unit tests inside the container
-        run: docker run --rm --network host -e DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} -e POSTGRES_DB -e POSTGRES_USER -e POSTGRES_PASSWORD -e POSTGRES_HOST workflowhub-backend python manage.py test
+
+      - name: Check Django configuration
+        run: |
+          docker run --rm --network host \
+            -e DJANGO_SECRET_KEY \
+            -e DJANGO_ALLOWED_HOSTS \
+            -e CORS_ALLOWED_ORIGINS \
+            -e POSTGRES_DB \
+            -e POSTGRES_USER \
+            -e POSTGRES_PASSWORD \
+            -e POSTGRES_HOST \
+            workflowhub-backend python manage.py check
+
+      - name: Run backend unit tests
+        run: |
+          docker run --rm --network host \
+            -e DJANGO_SECRET_KEY \
+            -e DJANGO_ALLOWED_HOSTS \
+            -e CORS_ALLOWED_ORIGINS \
+            -e POSTGRES_DB \
+            -e POSTGRES_USER \
+            -e POSTGRES_PASSWORD \
+            -e POSTGRES_HOST \
+            workflowhub-backend python manage.py test
 
   build-frontend:
+    name: Build Frontend
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Build frontend image
-        run: docker build --build-arg VITE_API_URL=$VITE_API_URL -t workflowhub-frontend ./frontend
+        run: |
+          docker build \
+            --build-arg VITE_API_URL="$VITE_API_URL" \
+            -t workflowhub-frontend ./frontend
+
+  playwright-tests:
+    name: Dockerised Playwright E2E Tests
+    runs-on: ubuntu-latest
+    needs: [build-backend, build-frontend]
+    timeout-minutes: 20
+
+    env:
+      VITE_API_URL: ${{ vars.CI_VITE_API_URL }}
+      BACKEND_PROXY_URL: ${{ vars.CI_BACKEND_PROXY_URL }}
+      PLAYWRIGHT_BASE_URL: ${{ vars.CI_PLAYWRIGHT_BASE_URL }}
+      DJANGO_ALLOWED_HOSTS: ${{ vars.CI_DJANGO_ALLOWED_HOSTS }}
+      CORS_ALLOWED_ORIGINS: ${{ vars.CI_CORS_ALLOWED_ORIGINS }}
+      DJANGO_SECRET_KEY: ci-only-test-secret-key-not-for-production
+      DJANGO_DEBUG: "False"
+      POSTGRES_DB: workflowhub
+      POSTGRES_USER: workflowhub
+      POSTGRES_PASSWORD: ci-test-password
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare environment configuration
+        run: |
+          cat > .env <<EOF
+          DJANGO_SECRET_KEY=$DJANGO_SECRET_KEY
+          DJANGO_DEBUG=$DJANGO_DEBUG
+          DJANGO_ALLOWED_HOSTS=$DJANGO_ALLOWED_HOSTS
+          CORS_ALLOWED_ORIGINS=$CORS_ALLOWED_ORIGINS
+          VITE_API_URL=$VITE_API_URL
+          BACKEND_PROXY_URL=$BACKEND_PROXY_URL
+          PLAYWRIGHT_BASE_URL=$PLAYWRIGHT_BASE_URL
+          POSTGRES_DB=$POSTGRES_DB
+          POSTGRES_USER=$POSTGRES_USER
+          POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+          EOF
+
+      - name: Validate Docker Compose configuration
+        run: docker compose --profile test config --quiet
+
+      - name: Build Docker images
+        run: docker compose --profile test build
+
+      - name: Start application containers
+        run: docker compose up -d --wait db backend frontend
+
+      - name: Run Dockerised Playwright tests
+        run: |
+          docker compose --profile test up \
+            --no-deps \
+            --abort-on-container-exit \
+            --exit-code-from playwright \
+            playwright
+
+      - name: Display container status
+        if: always()
+        run: docker compose --profile test ps -a
+
+      - name: Upload Playwright HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: e2e/playwright-report/
+          retention-days: 30
+
+      - name: Upload Playwright test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results
+          path: e2e/test-results/
+          retention-days: 30
+
+      - name: Display Docker logs on failure
+        if: failure()
+        run: docker compose --profile test logs
+
+      - name: Clean up Docker containers
+        if: always()
+        run: docker compose --profile test down -v
