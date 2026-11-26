@@ -34,6 +34,9 @@ export default defineConfig({
   ],
 
   use: {
+  launchOptions: {
+    slowMo: Number(process.env.SLOW_MO || 0),
+  },
     baseURL,
 
     trace: 'retain-on-failure',
